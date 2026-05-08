@@ -1,0 +1,62 @@
+# cex-signal-lab — example configuration
+# Copy to config.toml and tune to taste. NEVER commit your real config.toml.
+#
+# All thresholds shown are illustrative defaults, not optimized values.
+# Backtest before changing them, and never trade real money based on these.
+
+[account]
+initial_balance_usd = 1000.0     # paper-trading only — no real orders are sent
+position_pct        = 10         # % of balance per trade
+leverage            = 1
+max_open_positions  = 5
+cooldown_hours      = 4          # same symbol cool-off after open
+
+[universe]
+quote_asset         = "USDT"
+min_24h_volume_m    = 10         # exclude thin markets (millions USD)
+exclude_symbols     = ["BTCUSDT", "ETHUSDT", "USDCUSDT", "FDUSDUSDT", "BTCDOMUSDT"]
+
+# ──────────────────────────────────────────────────────────────────────────
+# Strategies — disable any by setting `enabled = false`
+# ──────────────────────────────────────────────────────────────────────────
+
+[strategies.extreme_neg_funding]
+enabled             = true
+funding_threshold   = -0.05      # current funding rate %, lower = more extreme
+min_negative_count  = 4          # out of last 8 funding periods
+sl_pct              = 0.08
+tp_pct              = 0.12
+
+[strategies.extreme_pos_funding]
+enabled             = true
+funding_threshold   = 0.10
+min_positive_count  = 4
+sl_pct              = 0.10
+tp_pct              = 0.15
+
+[strategies.crash_bounce]
+enabled             = true
+crash_24h_pct       = -20        # 24h drop must exceed this to qualify
+min_stabilization_h = 1          # require recent hour to be flat-or-up
+sl_pct              = 0.10
+tp_pct              = 0.15
+
+[strategies.pump_short]
+enabled             = true
+pump_24h_pct        = 30
+min_pullback_pct    = 10         # require pullback from 24h high before shorting
+sl_pct              = 0.15
+tp_pct              = 0.20
+
+# ──────────────────────────────────────────────────────────────────────────
+# Environment filter — multi-factor sanity check before opening
+# Each factor scores -1 / 0 / +1 / +2; trade requires total >= score_min
+# ──────────────────────────────────────────────────────────────────────────
+
+[env_filter]
+score_min           = 3
+btc_extreme_pct     = 5          # |BTC 24h%| > this is "extreme weather"
+fng_fear_threshold  = 25
+fng_greed_threshold = 75
+oi_min_usd          = 5_000_000
+volume_min_usd      = 50_000_000

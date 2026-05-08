@@ -1,0 +1,28 @@
+# Secrets / runtime data — never commit
+.env
+*.env
+config.toml
+trades.json
+scanner_state.json
+scanner.log
+*.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Backtest outputs
+backtest_results/
