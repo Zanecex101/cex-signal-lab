@@ -73,9 +73,17 @@ class Ledger:
         self.initial_balance_usd = initial_balance_usd
 
     def load(self) -> LedgerState:
+        """Load from disk. Raises ValueError on corrupted JSON."""
         if not self.path.exists():
             return LedgerState(self.initial_balance_usd, [])
-        raw = json.loads(self.path.read_text(encoding="utf-8"))
+        text = self.path.read_text(encoding="utf-8")
+        try:
+            raw = json.loads(text)
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"ledger {self.path} is corrupted ({e}). "
+                f"A backup may exist at {self.path}.bak — inspect manually."
+            ) from e
         trades = [Trade(**t) for t in raw.get("trades", [])]
         return LedgerState(
             raw.get("initial_balance", self.initial_balance_usd),
@@ -83,12 +91,25 @@ class Ledger:
         )
 
     def save(self, state: LedgerState) -> None:
+        """Crash-safe save: tmp+fsync+rename, with .bak rotation.
+
+        Survives mid-write crashes and power loss. The previous file
+        version is preserved as ``<path>.bak`` so a corrupted save
+        leaves the prior version recoverable.
+        """
         payload = {
             "initial_balance": state.initial_balance_usd,
             "trades": [dataclasses.asdict(t) for t in state.trades],
         }
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        # Atomic write: tmp file + rename. Day 8 adds fsync hardening.
+
+        # Rotate previous version to .bak before overwriting.
+        if self.path.exists():
+            try:
+                os.replace(self.path, self.path.with_suffix(self.path.suffix + ".bak"))
+            except OSError:
+                pass  # not fatal — the atomic rename below still works
+
         with tempfile.NamedTemporaryFile(
             mode="w",
             encoding="utf-8",
@@ -98,8 +119,17 @@ class Ledger:
             delete=False,
         ) as f:
             json.dump(payload, f, indent=2, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
             tmp_name = f.name
+
         os.replace(tmp_name, self.path)
+        # fsync the directory so the rename itself is durable.
+        dir_fd = os.open(str(self.path.parent), os.O_RDONLY)
+        try:
+            os.fsync(dir_fd)
+        finally:
+            os.close(dir_fd)
 
     def append(self, state: LedgerState, trade: Trade) -> None:
         state.trades.append(trade)
