@@ -73,19 +73,27 @@ def scan(cfg: Config) -> list[Signal]:
     return signals
 
 
-def main() -> int:
-    print(f"cex-signal-lab v{__version__}")
-    try:
-        cfg = load_config()
-    except FileNotFoundError as e:
-        log(f"config not found: {e}", level="ERROR")
-        return 2
+LOCK_PATH = "/tmp/cex-signal-lab.lock"
 
-    try:
-        scan(cfg)
-    except Exception as e:
-        log(f"scan crashed: {e}", level="ERROR")
-        return 3
+
+def main() -> int:
+    from cex_signal_lab.lock import single_scan_lock
+
+    print(f"cex-signal-lab v{__version__}")
+    with single_scan_lock(LOCK_PATH) as got_lock:
+        if not got_lock:
+            log("another scan is in flight, exiting cleanly", level="INFO")
+            return 0
+        try:
+            cfg = load_config()
+        except FileNotFoundError as e:
+            log(f"config not found: {e}", level="ERROR")
+            return 2
+        try:
+            scan(cfg)
+        except Exception as e:
+            log(f"scan crashed: {e}", level="ERROR")
+            return 3
     return 0
 
 
