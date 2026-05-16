@@ -13,6 +13,7 @@ import json
 import os
 import sys
 import urllib.parse
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -60,27 +61,62 @@ def log(text: str, level: str = "INFO", log_file: Path | str | None = None) -> N
             print(f"[{_now()}] [WARN] log_file write failed: {e}", file=sys.stderr)
 
 
-def notify(text: str, *, parse_mode: str = "Markdown") -> bool:
+_MD_V2_SPECIAL = r"_*[]()~`>#+-=|{}.!"
+
+
+def escape_md(text: str) -> str:
+    """Escape Telegram MarkdownV2 special characters.
+
+    A single literal underscore in a strategy reason will otherwise turn
+    a notification into a 400 from TG and the message vanishes. Strip
+    the formatting risk before sending.
+    """
+    return "".join("\" + c if c in _MD_V2_SPECIAL else c for c in text)
+
+
+def notify(text: str, *, parse_mode: str = "MarkdownV2", escape: bool = True,
+           retries: int = 3) -> bool:
     """Send a Telegram message. Returns True on success.
 
     No-op (returns False) if TG credentials are not configured.
+
+    ``escape``: when True (default), MarkdownV2 special chars in ``text``
+    are escaped automatically. Set to False if you have hand-formatted
+    Markdown that you want sent verbatim.
     """
     token, chat_id = _config()
     if not token or not chat_id:
         log("TG credentials missing, skipping notification", level="WARN")
         return False
+    payload_text = escape_md(text) if escape else text
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = urllib.parse.urlencode({
         "chat_id": chat_id,
-        "text": text,
+        "text": payload_text,
         "parse_mode": parse_mode,
     }).encode()
-    try:
-        with urllib.request.urlopen(url, data=data, timeout=10) as r:
-            ok = r.status == 200
-            if not ok:
-                log(f"TG send returned status={r.status}", level="WARN")
-            return ok
-    except Exception as e:
-        log(f"TG send failed: {e}", level="WARN")
-        return False
+
+    import time
+    backoff = 1.0
+    for attempt in range(1, retries + 1):
+        try:
+            with urllib.request.urlopen(url, data=data, timeout=10) as r:
+                if r.status == 200:
+                    return True
+                # 4xx is a client problem; don't retry, just log.
+                if 400 <= r.status < 500:
+                    log(f"TG send rejected status={r.status}", level="WARN")
+                    return False
+                log(f"TG send 5xx status={r.status}, retrying", level="WARN")
+        except urllib.error.HTTPError as e:
+            if 400 <= e.code < 500:
+                log(f"TG send rejected ({e.code} {e.reason})", level="WARN")
+                return False
+            log(f"TG send HTTPError {e.code}, retrying", level="WARN")
+        except Exception as e:
+            log(f"TG send error attempt={attempt}: {e}", level="WARN")
+        if attempt < retries:
+            time.sleep(backoff)
+            backoff *= 2
+    log(f"TG send gave up after {retries} attempts", level="ERROR")
+    return False
