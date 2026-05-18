@@ -48,17 +48,17 @@ def _now() -> str:
 
 
 def log(text: str, level: str = "INFO", log_file: Path | str | None = None) -> None:
-    """Append a timestamped line to stdout + optional log file."""
-    line = f"[{_now()}] [{level}] {text}"
-    print(line, file=sys.stderr if level in {"ERROR", "WARN"} else sys.stdout)
-    if log_file is not None:
-        path = Path(log_file)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            with path.open("a", encoding="utf-8") as f:
-                f.write(line + "\n")
-        except OSError as e:
-            print(f"[{_now()}] [WARN] log_file write failed: {e}", file=sys.stderr)
+    """Backward-compatible logging shim. Delegates to the stdlib logger.
+
+    ``log_file`` is ignored — file logging is now controlled centrally
+    in cex_signal_lab.logger via standard logging handlers.
+    """
+    from cex_signal_lab.logger import log as _logger
+    method = {"DEBUG": _logger.debug, "INFO": _logger.info,
+              "WARN": _logger.warning, "WARNING": _logger.warning,
+              "ERROR": _logger.error, "CRITICAL": _logger.critical}.get(
+        level.upper(), _logger.info)
+    method(text)
 
 
 _MD_V2_SPECIAL = r"_*[]()~`>#+-=|{}.!"
