@@ -3,6 +3,7 @@
 > **Open lab for rule-based crypto signal strategies on centralized exchanges.**
 > Pluggable strategies, paper-trades only, no API keys, every threshold in plain TOML.
 
+[![Tests](https://github.com/Zanecex101/cex-signal-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/Zanecex101/cex-signal-lab/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Status: Day 1 of 30](https://img.shields.io/badge/status-day%201%20of%2030-orange.svg)](#roadmap)
