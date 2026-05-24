@@ -13,12 +13,16 @@ from typing import Any
 import httpx
 
 from cex_signal_lab import __version__
+from pathlib import Path
+
 from cex_signal_lab.binance import (
     fetch_24h_tickers,
     fetch_btc_change_pct,
     fetch_funding_rates,
 )
 from cex_signal_lab.config import Config, load_config
+from cex_signal_lab.ledger import Ledger
+from cex_signal_lab.monitor import check_exits
 from cex_signal_lab.notify import log
 from cex_signal_lab.strategies import ALL_STRATEGIES, Signal
 
@@ -46,12 +50,26 @@ def build_strategies(cfg: Config) -> list[Any]:
     return out
 
 
+LEDGER_PATH = Path("trades.json")
+
+
 def scan(cfg: Config) -> list[Signal]:
     signals: list[Signal] = []
     with httpx.Client() as client:
         tickers = fetch_24h_tickers(client)
         funding = fetch_funding_rates(client)
         btc_chg = fetch_btc_change_pct(client)
+
+    # Monitor pass: close any open trades that touched SL/TP.
+    ticker_map = {t["symbol"]: float(t["lastPrice"]) for t in tickers}
+    ledger = Ledger(LEDGER_PATH, initial_balance_usd=cfg.account.initial_balance_usd)
+    state = ledger.load()
+    closed = check_exits(state, ticker_map)
+    if closed:
+        ledger.save(state)
+        for t in closed:
+            log(f"closed #{t.id} {t.symbol} {t.direction} → {t.exit_reason} "
+                f"price={t.exit_price} pnl={t.pnl_usd:+.2f} USD")
 
     candidates = filter_universe(tickers, cfg)
     log(f"universe: {len(candidates)} symbols passing filters")
