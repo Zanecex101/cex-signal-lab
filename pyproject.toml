@@ -34,6 +34,9 @@ dev = [
     "mypy>=1.10",
 ]
 
+[project.scripts]
+cex-signal-summary = "cex_signal_lab.summary:main"
+
 [project.urls]
 Homepage = "https://github.com/Zanecex101/cex-signal-lab"
 Issues = "https://github.com/Zanecex101/cex-signal-lab/issues"
