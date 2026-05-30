@@ -1,0 +1,11 @@
+services:
+  scanner:
+    build: .
+    container_name: cex-signal-lab
+    restart: unless-stopped
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./.env:/app/.env:ro
+      - ./trades.json:/app/trades.json
+    environment:
+      - LOG_LEVEL=INFO

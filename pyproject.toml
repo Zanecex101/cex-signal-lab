@@ -35,6 +35,7 @@ dev = [
 ]
 
 [project.scripts]
+cex-signal-lab = "cex_signal_lab.scanner:main"
 cex-signal-summary = "cex_signal_lab.summary:main"
 
 [project.urls]
