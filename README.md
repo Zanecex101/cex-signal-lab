@@ -6,10 +6,7 @@
 [![Tests](https://github.com/Zanecex101/cex-signal-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/Zanecex101/cex-signal-lab/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Status: Day 1 of 30](https://img.shields.io/badge/status-day%201%20of%2030-orange.svg)](#roadmap)
-
-> ⚠️ **This project is in active scaffolding (Day 1 of 30).** The first usable
-> release lands on Day 7. See the [roadmap](#roadmap) below.
+[![Status: Day 22 of 30](https://img.shields.io/badge/status-day%2022%20of%2030-yellow.svg)](#roadmap)
 
 ## Why this exists
 
@@ -27,47 +24,91 @@ It's a sibling project of [`cex-watch-mcp`](https://github.com/Zanecex101/cex-wa
 (which provides the clean exchange data feed). This one builds the signal
 detection layer on top.
 
-## What it will do (when finished)
+## How it works
 
-- Scan Binance USDT-perpetual futures every minute
-- Run 4–5 reference rule-based signal strategies:
+```
+                     ┌────────────────────────┐
+                     │ config.toml             │  thresholds, sizes, knobs
+                     └────────────┬────────────┘
+                                  │
+       ┌──────────────────────────┴──────────────────────────┐
+       │                       scanner                         │
+       │   load_config → fetch tickers/funding/BTC →          │
+       │   monitor.check_exits → filter universe →            │
+       │   strategies.detect ×N → env_filter →                │
+       │   executor.execute → ledger.append                   │
+       └──────────────────────────┬──────────────────────────┘
+                                  │
+        ┌────────────┬───────────┼───────────┬──────────────┐
+        ▼            ▼           ▼           ▼              ▼
+   strategies/   env_filter   executor    ledger        notify
+   (4 stubs +    (4-factor    (cooldown,  (atomic       (TG +
+    real rules)   score)       max-N)     JSON+lock)    log)
+```
+
+## What it does
+
+- Scans Binance USDT-perpetual futures every minute
+- Runs 4 reference rule-based signal strategies:
   - Extreme negative funding → squeeze setup
-  - Extreme positive funding → crowded long
+  - Extreme positive funding → crowded long fade
   - 24h crash + stabilization → mean-revert long
   - 24h pump + pullback → fade short
-- Score every signal against a multi-factor environment filter (BTC regime,
+- Scores every signal against a multi-factor environment filter (BTC regime,
   market sentiment, open interest, volume) before opening
-- Open paper-trades to a local JSON ledger
-- Push every fill / close to Telegram
-- Output daily summary stats: win-rate per strategy, cumulative P&L
+- Opens paper-trades to a local JSON ledger
+- Closes positions automatically on stop-loss / take-profit
+- Pushes every fill / close to Telegram
+- `cex-signal-summary` CLI for win-rate per strategy + cumulative P&L
 
 ## Status
 
-This is the scaffolding commit. There is no working code yet — only the
-project skeleton, the configuration schema, and the development plan.
+| Subsystem                       | Status |
+|---------------------------------|--------|
+| Project skeleton (Day 1)        | ✅ |
+| Package layout (Day 2)          | ✅ |
+| Strategy ABC + 4 stubs (Day 3)  | ✅ |
+| Ledger module (Day 4)           | ✅ |
+| Notify module (Day 5)           | ✅ |
+| TOML config (Day 6)             | ✅ |
+| Scanner main loop (Day 7)       | ✅ |
+| Atomic / fsync ledger (Day 8)   | ✅ |
+| fcntl process lock (Day 9)      | ✅ |
+| TG escape + retry (Day 10)      | ✅ |
+| Binance API validation (Day 11) | ✅ |
+| stdlib logging (Day 12)         | ✅ |
+| Unit tests (Day 13)             | ✅ |
+| GitHub Actions CI (Day 14)      | ✅ |
+| Real funding strategies (Day 15)| ✅ |
+| Real price strategies (Day 16)  | ✅ |
+| Position monitor (Day 17)       | ✅ |
+| env_filter scoring (Day 18)     | ✅ |
+| Executor + cooldown (Day 19)    | ✅ |
+| Daily summary CLI (Day 20)      | ✅ |
+| Full integration + Docker (Day 21) | ✅ |
+| Documentation (Day 22-26)       | 🚧 |
+| 5th strategy (Day 29)           | 🚧 |
+| **v0.2.0 release (Day 30)**     | 🚧 |
 
-| Subsystem        | Status |
-|------------------|--------|
-| Project skeleton | ✅ Day 1 |
-| Strategy modules | 🚧 Day 3 |
-| Ledger module    | 🚧 Day 4 |
-| Notify module    | 🚧 Day 5 |
-| First runnable scanner | 🚧 Day 7 |
-| Position monitor / SL+TP | 🚧 Day 15 |
-| First stable release v0.2.0 | 🚧 Day 30 |
+## Install
 
-## Roadmap
+```bash
+pip install cex-signal-lab    # once published; for now, install from source:
 
-This project is being built deliberately over **30 calendar days**, with one
-focused commit per day. The plan:
+git clone https://github.com/Zanecex101/cex-signal-lab
+cd cex-signal-lab
+pip install -e .
+cp config.example.toml config.toml
+cp .env.example .env       # optional — for Telegram notifications
+cex-signal-lab             # run one scan
+cex-signal-summary         # view P&L breakdown
+```
 
-- **Week 1 (Day 1–7)** — Scaffold and modular extraction
-- **Week 2 (Day 8–14)** — Hardening (atomic writes, locking, error handling, tests, CI)
-- **Week 3 (Day 15–21)** — Feature polish (auto SL/TP exit, retries, daily summary, Docker)
-- **Week 4 (Day 22–30)** — Documentation, examples, second strategy pack, v0.2.0 release
+Or with Docker:
 
-Track progress via the commit log — every commit message is `feat:`, `fix:`,
-`refactor:`, `docs:`, `test:`, or `ci:` describing one specific improvement.
+```bash
+docker compose up -d
+```
 
 ## Disclaimer
 
