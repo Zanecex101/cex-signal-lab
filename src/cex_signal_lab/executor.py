@@ -11,7 +11,6 @@ This module just answers: 'given the scored signal, write a Trade'.
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 from cex_signal_lab.config import AccountConfig
 from cex_signal_lab.env_filter import EnvDecision

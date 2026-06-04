@@ -12,7 +12,6 @@ responsible for fetching the latest 24h tickers and passing them in.
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 from cex_signal_lab.ledger import LedgerState, Trade
 

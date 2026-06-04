@@ -8,13 +8,12 @@ Subsequent days fill in the gaps.
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from typing import Any
 
 import httpx
 
 from cex_signal_lab import __version__
-from pathlib import Path
-
 from cex_signal_lab.binance import (
     fetch_24h_tickers,
     fetch_btc_change_pct,
@@ -55,7 +54,9 @@ LEDGER_PATH = Path("trades.json")
 
 def scan(cfg: Config) -> list[Signal]:
     from cex_signal_lab.binance import (
-        fetch_funding_history, fetch_klines, fetch_open_interest,
+        fetch_funding_history,
+        fetch_klines,
+        fetch_open_interest,
     )
     from cex_signal_lab.env_filter import evaluate
     from cex_signal_lab.executor import execute
@@ -165,6 +166,9 @@ def scan(cfg: Config) -> list[Signal]:
 
     log(f"scan complete: {len(signals)} signals across {len(candidates)} symbols")
     return signals
+
+
+LOCK_PATH = "/tmp/cex-signal-lab.lock"
 
 
 def main() -> int:

@@ -9,7 +9,6 @@ breakdown that's recorded on every trade for later analysis.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from cex_signal_lab.config import EnvFilterConfig
 from cex_signal_lab.strategies import Signal

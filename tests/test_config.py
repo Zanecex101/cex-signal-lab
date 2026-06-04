@@ -6,7 +6,6 @@ from pathlib import Path
 
 from cex_signal_lab.config import load_config
 
-
 SAMPLE = """
 [account]
 initial_balance_usd = 250

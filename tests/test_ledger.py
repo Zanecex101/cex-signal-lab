@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from cex_signal_lab.ledger import Ledger, LedgerState, Trade
 
 

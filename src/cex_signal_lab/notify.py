@@ -9,11 +9,9 @@ error logging on send failure. For now, failures are quietly logged.
 
 from __future__ import annotations
 
-import json
 import os
-import sys
-import urllib.parse
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -71,7 +69,7 @@ def escape_md(text: str) -> str:
     a notification into a 400 from TG and the message vanishes. Strip
     the formatting risk before sending.
     """
-    return "".join("\" + c if c in _MD_V2_SPECIAL else c for c in text)
+    return "".join("\\" + c if c in _MD_V2_SPECIAL else c for c in text)
 
 
 def notify(text: str, *, parse_mode: str = "MarkdownV2", escape: bool = True,
