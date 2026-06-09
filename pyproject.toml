@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cex-signal-lab"
-version = "0.1.0a1"
+version = "0.1.0"
 description = "Open lab for rule-based crypto signal strategies on centralized exchanges. Pluggable strategies, paper-trades, no API keys, fully transparent."
 readme = "README.md"
 requires-python = ">=3.10"
