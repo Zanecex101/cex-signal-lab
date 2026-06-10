@@ -5,8 +5,8 @@ All notable changes to cex-signal-lab. Format follows
 
 ## [Unreleased]
 
-### Coming in v0.2.0
-- 5th strategy: funding-rate flip detection
+### Added (heading toward v0.2.0)
+- 5th strategy: FundingFlip — detects funding rate sign flip with non-trivial magnitude
 - README v0.3 with a full screenshot of the daily summary
 
 ## [0.1.0] — 2026-05 (current)

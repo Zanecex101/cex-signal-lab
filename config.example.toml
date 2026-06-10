@@ -60,3 +60,9 @@ fng_fear_threshold  = 25
 fng_greed_threshold = 75
 oi_min_usd          = 5_000_000
 volume_min_usd      = 50_000_000
+[strategies.funding_flip]
+enabled             = true
+flip_min_magnitude  = 0.04       # |latest rate| must exceed this %
+sl_pct              = 0.08
+tp_pct              = 0.12
+

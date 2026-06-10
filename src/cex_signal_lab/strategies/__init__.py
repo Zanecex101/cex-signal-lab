@@ -9,6 +9,7 @@ Add a new strategy by:
 from cex_signal_lab.strategies.base import Signal, Strategy
 from cex_signal_lab.strategies.crash_bounce import CrashBounce
 from cex_signal_lab.strategies.funding_extreme_neg import FundingExtremeNeg
+from cex_signal_lab.strategies.funding_flip import FundingFlip
 from cex_signal_lab.strategies.funding_extreme_pos import FundingExtremePos
 from cex_signal_lab.strategies.pump_short import PumpShort
 
@@ -17,6 +18,7 @@ ALL_STRATEGIES: list[type[Strategy]] = [
     FundingExtremePos,
     CrashBounce,
     PumpShort,
+    FundingFlip,
 ]
 
 __all__ = [
@@ -24,6 +26,7 @@ __all__ = [
     "CrashBounce",
     "FundingExtremeNeg",
     "FundingExtremePos",
+    "FundingFlip",
     "PumpShort",
     "Signal",
     "Strategy",
