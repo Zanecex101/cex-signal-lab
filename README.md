@@ -6,7 +6,7 @@
 [![Tests](https://github.com/Zanecex101/cex-signal-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/Zanecex101/cex-signal-lab/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Status: Day 22 of 30](https://img.shields.io/badge/status-day%2022%20of%2030-yellow.svg)](#roadmap)
+[![Stable](https://img.shields.io/badge/status-stable%20v0.2.0-success.svg)](https://github.com/Zanecex101/cex-signal-lab/releases)
 
 ## Why this exists
 

@@ -5,8 +5,18 @@ All notable changes to cex-signal-lab. Format follows
 
 ## [Unreleased]
 
-### Added (heading toward v0.2.0)
-- 5th strategy: FundingFlip — detects funding rate sign flip with non-trivial magnitude
+(no unreleased changes)
+
+## [0.2.0] — 2026-06-12
+
+### Added
+- 5th strategy: FundingFlip — detects funding rate sign flip with
+  non-trivial magnitude (regime change signal, complements the four
+  extreme-state strategies)
+
+### Changed
+- README status badge → stable v0.2.0
+- Default config.example.toml ships with FundingFlip enabled
 - README v0.3 with a full screenshot of the daily summary
 
 ## [0.1.0] — 2026-05 (current)
