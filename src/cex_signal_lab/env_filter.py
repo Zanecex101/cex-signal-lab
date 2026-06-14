@@ -37,7 +37,14 @@ def _score_btc(direction: str, btc_chg: float, cfg: EnvFilterConfig) -> tuple[in
 
 
 def _score_sentiment(direction: str, fng: int | None, cfg: EnvFilterConfig) -> tuple[int, str]:
+    # FGI feed occasionally returns None for 2-10 minutes (provider hiccup).
+    # We score it 0 and log so the missing factor is visible in the scan log
+    # rather than silently flattening the verdict.
     if fng is None:
+        import logging
+        logging.getLogger("cex_signal_lab").warning(
+            "env_filter: FGI unavailable, scoring sentiment factor as 0"
+        )
         return 0, "FGI unavailable (0)"
     if direction == "long":
         if fng <= cfg.fng_fear_threshold:
