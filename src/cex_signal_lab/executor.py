@@ -25,7 +25,14 @@ def _now_iso() -> str:
 
 
 def is_in_cooldown(state: LedgerState, symbol: str, hours: int) -> bool:
-    """Return True if symbol was opened or closed within the last ``hours``."""
+    """Return True if symbol was opened or closed within the last ``hours``.
+
+    cooldown_hours=0 disables the gate entirely. Otherwise a non-positive
+    value would degenerate the cutoff to "now" and block every re-entry
+    by accident.
+    """
+    if hours <= 0:
+        return False
     cutoff = datetime.now(TZ_CN) - timedelta(hours=hours)
     for t in state.trades:
         if t.symbol != symbol:
