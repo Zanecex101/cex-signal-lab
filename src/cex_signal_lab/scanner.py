@@ -30,12 +30,24 @@ def filter_universe(tickers: list[dict[str, Any]], cfg: Config) -> list[dict[str
     quote = cfg.universe.quote_asset
     excl = set(cfg.universe.exclude_symbols)
     min_vol = cfg.universe.min_24h_volume_m * 1e6
-    return [
-        t for t in tickers
-        if t["symbol"].endswith(quote)
-        and t["symbol"] not in excl
-        and float(t.get("quoteVolume", 0)) > min_vol
-    ]
+    # Deduplicate by symbol: Binance occasionally double-emits during shard
+    # rotation, which would otherwise let two paper-trades open on the same
+    # symbol in one scan.
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for t in tickers:
+        sym = t["symbol"]
+        if sym in seen:
+            continue
+        if not sym.endswith(quote):
+            continue
+        if sym in excl:
+            continue
+        if float(t.get("quoteVolume", 0)) <= min_vol:
+            continue
+        seen.add(sym)
+        out.append(t)
+    return out
 
 
 def build_strategies(cfg: Config) -> list[Any]:
