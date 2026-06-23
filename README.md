@@ -110,6 +110,26 @@ Or with Docker:
 docker compose up -d
 ```
 
+
+## FAQ
+
+**Why no real orders?**
+The lab is paper-trading by design. Adding real-money execution opens
+a category of bugs (slippage, partial fills, exchange auth) that the
+strategy work doesn't need to validate.
+
+**Why exactly 4 (now 5) strategies?**
+Each one fails differently. A wider pack would dilute attribution
+during the first few hundred paper-trades.
+
+**What does signal strength S / A / B actually mean?**
+Tiers come from how extreme the signal's primary input is. S is the
+top decile, A the next, B everything that still cleared the trigger.
+Used as bonus weight in the env filter.
+
+**Where are the backtests?**
+Outside the scope of v0.2. Replay tooling lives on the v0.3 roadmap.
+
 ## Disclaimer
 
 This is **educational software**. Default parameters are illustrative,
