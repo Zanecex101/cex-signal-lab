@@ -52,13 +52,11 @@ def filter_universe(tickers: list[dict[str, Any]], cfg: Config) -> list[dict[str
 
 def build_strategies(cfg: Config) -> list[Any]:
     """Instantiate enabled strategies with their config blocks."""
-    out = []
-    for cls in ALL_STRATEGIES:
-        block = cfg.strategies.get(cls.name)
-        if block is None or not block.enabled:
-            continue
-        out.append(cls({"sl_pct": block.sl_pct, "tp_pct": block.tp_pct, **block.extras}))
-    return out
+    return [
+        cls({"sl_pct": block.sl_pct, "tp_pct": block.tp_pct, **block.extras})
+        for cls in ALL_STRATEGIES
+        if (block := cfg.strategies.get(cls.name)) and block.enabled
+    ]
 
 
 LEDGER_PATH = Path("trades.json")
