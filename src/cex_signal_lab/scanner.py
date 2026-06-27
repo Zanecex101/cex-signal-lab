@@ -110,7 +110,7 @@ def scan(cfg: Config) -> list[Signal]:
             # interested, populate funding_history / klines_1h once.
             try:
                 if symbol not in context["funding_history"]:
-                    context["funding_history"][symbol] = fetch_funding_history(client, symbol, 8)
+                    context["funding_history"][symbol] = fetch_funding_history(client, symbol, 5)
             except Exception:
                 pass
             try:
