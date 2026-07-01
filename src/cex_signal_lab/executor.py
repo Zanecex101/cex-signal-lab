@@ -96,7 +96,10 @@ def execute(
         strength=signal.strength,
         reason=signal.reason,
         status="open",
-        pre_analysis={"env_score": decision.score, **decision.breakdown},
+        pre_analysis={
+            "env_score": decision.score,
+            **{k.replace("-", "_").lower(): v for k, v in decision.breakdown.items()},
+        },
     )
     ledger.append(state, trade)
     return trade
