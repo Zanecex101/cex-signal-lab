@@ -39,15 +39,21 @@ def check_exits(state: LedgerState, ticker_map: dict[str, float]) -> list[Trade]
     """Mutate state in place, returning the list of trades just closed.
 
     ``ticker_map`` is a {symbol: current_price} dict. Trades whose symbol
-    is missing from the map are left open (the price feed may have
-    transient gaps; the next scan cycle will catch up).
+    is missing from the map or has a non-finite price are left open
+    (transient feed gaps; next scan catches up).
     """
     closed: list[Trade] = []
     for t in state.trades:
         if t.status != "open":
             continue
-        price = ticker_map.get(t.symbol)
-        if price is None:
+        raw = ticker_map.get(t.symbol)
+        if raw is None or raw == "" or raw == 0:
+            continue
+        try:
+            price = float(raw)
+        except (TypeError, ValueError):
+            continue
+        if price <= 0:
             continue
         if t.direction == "long":
             if price <= t.stop_loss:
