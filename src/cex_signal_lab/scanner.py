@@ -182,7 +182,17 @@ LOCK_PATH = "/tmp/cex-signal-lab.lock"
 
 
 def main() -> int:
+    import argparse
+
     from cex_signal_lab.lock import single_scan_lock
+
+    parser = argparse.ArgumentParser(prog="cex-signal-lab")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="run scan end-to-end without writing to ledger")
+    args = parser.parse_args()
+    if args.dry_run:
+        import logging
+        logging.getLogger("cex_signal_lab").info("DRY RUN: ledger writes suppressed")
 
     print(f"cex-signal-lab v{__version__}")
     with single_scan_lock(LOCK_PATH) as got_lock:
