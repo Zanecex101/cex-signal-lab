@@ -62,3 +62,22 @@ def test_save_creates_backup(tmp_path: Path) -> None:
     led.save(state)
     assert (tmp_path / "ledger.json.bak").exists(), \
         "previous version should be preserved as .bak"
+
+def test_balance_matches_sum_of_closed_pnl():
+    from cex_signal_lab.ledger import LedgerState, Trade
+    closed_trades = [
+        Trade(id="001", symbol="A", direction="long", leverage=1,
+              position_pct=10, position_usd=100, notional_usd=100,
+              entry_price=1.0, stop_loss=0.9, take_profit=1.2,
+              entry_time="2026-06-24T10:00:00+08:00",
+              strategy="t", strength="A", reason="t",
+              status="closed", pnl_usd=12.5),
+        Trade(id="002", symbol="B", direction="short", leverage=1,
+              position_pct=10, position_usd=100, notional_usd=100,
+              entry_price=2.0, stop_loss=2.2, take_profit=1.8,
+              entry_time="2026-06-24T11:00:00+08:00",
+              strategy="t", strength="A", reason="t",
+              status="closed", pnl_usd=-4.0),
+    ]
+    state = LedgerState(initial_balance_usd=1000.0, trades=closed_trades)
+    assert state.balance() == 1000.0 + 12.5 - 4.0
