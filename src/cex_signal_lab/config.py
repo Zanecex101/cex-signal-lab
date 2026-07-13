@@ -25,6 +25,7 @@ class AccountConfig:
     leverage: int = 1
     max_open_positions: int = 5
     cooldown_hours: int = 4
+    ledger_path: str = "trades.json"
 
 
 @dataclass
