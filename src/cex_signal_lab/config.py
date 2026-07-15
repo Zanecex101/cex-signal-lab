@@ -88,6 +88,16 @@ def load_config(path: Path | str | None = None) -> Config:
     env_block = raw.get("env_filter", {})
     strategies_block = raw.get("strategies", {})
 
+    # Warn on unknown top-level sections so a typo like [accont] does
+    # not silently fall back to defaults.
+    known_top = {"account", "universe", "env_filter", "strategies"}
+    unknown = set(raw.keys()) - known_top
+    if unknown:
+        import logging
+        logging.getLogger("cex_signal_lab").warning(
+            "config: unknown top-level sections ignored: %s", sorted(unknown)
+        )
+
     return Config(
         account=AccountConfig(**account_block),
         universe=UniverseConfig(**universe_block),
