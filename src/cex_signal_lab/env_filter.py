@@ -96,6 +96,15 @@ def evaluate(
     breakdown: dict[str, str] = {}
     total = 0
 
+    # Fast path: a B-strength signal during hostile BTC cannot reach the
+    # default score_min=3 no matter what OI / FGI / volume do. Save the
+    # extra fetches the caller would otherwise issue.
+    btc_score, btc_line = _score_btc(signal.direction, btc_change_pct, cfg)
+    if btc_score == -1 and signal.strength == "B":
+        breakdown["btc"] = btc_line
+        breakdown["verdict"] = "early-exit: B + hostile BTC"
+        return EnvDecision(passed=False, score=-1, breakdown=breakdown)
+
     s, line = _score_btc(signal.direction, btc_change_pct, cfg)
     breakdown["btc"] = line
     total += s
