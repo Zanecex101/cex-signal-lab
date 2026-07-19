@@ -7,6 +7,34 @@ All notable changes to cex-signal-lab. Format follows
 
 (no unreleased changes)
 
+## [0.2.1] - 2026-07-19
+
+### Fixed
+- FGI=None now logs a warning instead of silently scoring 0 (#Day-31)
+- cooldown_hours=0 no longer blocks every re-entry forever (#Day-32)
+- Scanner deduplicates duplicate symbols from Binance feed (#Day-34)
+- Summary CLI strips trailing whitespace from ledger path (#Day-36)
+- Monitor tolerates empty / zero lastPrice from freshly-listed pairs (#Day-42)
+
+### Changed
+- httpx pinned to >=0.28 (#Day-33)
+- Funding-history lookback reduced 8 → 5 periods (#Day-38)
+- Pre-commit + codespell hooks (#Day-39)
+- Trade.pre_analysis uses snake_case keys consistently (#Day-40)
+- GitHub Actions pinned to ubuntu-24.04 (#Day-44)
+- env_filter short-circuits B + hostile-BTC combinations (#Day-49)
+
+### Added
+- README FAQ section (#Day-35)
+- docs/troubleshooting.md (#Day-43)
+- Scanner --dry-run flag (#Day-45)
+- ledger_path field in AccountConfig (#Day-47)
+- TOML schema validation warns on unknown top-level sections (#Day-48)
+- README v0.3 roadmap section (#Day-50)
+- GitHub ISSUE_TEMPLATE for bug + strategy (#Day-51)
+- Tests for executor cooldown + max_positions, ledger balance math
+  (#Day-32, #Day-41, #Day-46)
+
 ## [0.2.0] — 2026-06-12
 
 ### Added
